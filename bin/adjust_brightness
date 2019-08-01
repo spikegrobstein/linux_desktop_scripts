@@ -1,0 +1,45 @@
+#! /usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+base_dir="/sys/class/backlight/intel_backlight"
+default_increment=50
+
+max_brightness="$( cat "$base_dir/max_brightness" )"
+
+current_brightness() {
+  cat "$base_dir/brightness"
+}
+
+increment() {
+  local inc="$1"
+
+  local c
+  c="$( current_brightness )"
+
+  local new=$(( c + inc ))
+
+  echo "$new" > "$base_dir/brightness"
+}
+
+decrement() {
+  local inc="$1"
+
+  increment "-$inc"
+}
+
+# printf "current: %s/%s\n" "$(current_brightness)" "$max_brightness"
+
+action="$1"
+
+case "$action" in
+  inc)
+    increment "$default_increment"
+    ;;
+
+  dec)
+    decrement "$default_increment"
+    ;;
+esac
